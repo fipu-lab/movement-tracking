@@ -22,3 +22,6 @@ Using video file
 ```bash
 python movement_tracking.py --video /path/to/my/video.mp4
 ```
+
+Base for this project : 
+https://github.com/cfotache/pytorch_objectdetecttrack
