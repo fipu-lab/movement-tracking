@@ -22,30 +22,36 @@ import re
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--video", help="Enter the name of your video file")
+parser.add_argument("--output", help= "Use if you want to keep csv file")
 args = parser.parse_args()
 
+if args.output:
+    csv_name = str(args.output)
+else:
+    csv_name = "movement_data.csv"
 
-if os.path.exists("movement_data.csv"):
-    os.remove("movement_data.csv")
+#Remove csv file with same name if exists
+if os.path.exists(csv_name):
+    os.remove(csv_name)
 
-def start_visualization():
+def start_visualization(file_name):
     python = sys.executable
     if sys.platform == "win32":
         if re.search("\s", python): 
             python = "\""+python+"\""
     print(python)
-    os.system(str(python + " visualization.py"))
+    os.system(str(python + " visualization.py "+ file_name))
 
 
-def write_to_csv(data):
-    if os.path.exists("movement_data.csv"):
-        with open("movement_data.csv", "a", newline='') as file:
+def write_to_csv(data, file_name):
+    if os.path.exists(file_name):
+        with open(file_name, "a", newline='') as file:
             fieldnames = ['timestamp', "id",'result']
             writer = csv.DictWriter(file, fieldnames = fieldnames)
             for key in data:
                 writer.writerow(key)
     else:
-        with open('movement_data.csv', 'w', newline='') as file:
+        with open(file_name, 'w', newline='') as file:
             fieldnames = ['timestamp', "id",'result']
             writer = csv.DictWriter(file, fieldnames = fieldnames)
             writer.writeheader()
@@ -56,7 +62,6 @@ def calculate_movement(time, data):
     """
     time: current frame
     data: data gathered until time
-    results: movement results until time
     """
     data = pd.DataFrame(data)
     timeWindow = 60
@@ -230,9 +235,9 @@ while(True):
                 data.append(temp)
 
                 if frames > 60:
-                    write_to_csv(calculate_movement(frames, data))
+                    write_to_csv(calculate_movement(frames, data), file_name = csv_name)
                     if viz_flag:
-                        t = threading.Thread(target=start_visualization)
+                        t = threading.Thread(target=start_visualization, args=(csv_name, ))
                         t.daemon = True
                         t.start()
                         viz_flag = False
@@ -247,4 +252,5 @@ while(True):
 totaltime = time.time()-starttime
 print(frames, "frames", totaltime/frames, "s/frame")
 cv2.destroyAllWindows()
-
+if not args.output:
+    os.remove(csv_name)

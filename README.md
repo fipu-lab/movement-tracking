@@ -23,5 +23,14 @@ Using video file
 python movement_tracking.py --video /path/to/my/video.mp4
 ```
 
+If you want to save csv file
+
+```bash
+python movement_tracking.py --output name.csv
+```
+
+
+
 Base for this project : 
+
 https://github.com/cfotache/pytorch_objectdetecttrack
