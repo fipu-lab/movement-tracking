@@ -1,0 +1,147 @@
+#:kivy 1.10.0
+
+
+<MainWindow>:
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+
+    GridLayout:
+        cols:1
+
+        Label:
+            text: "Movement Tracking Application"
+            color: 0,0,0,1
+            font_size: 25
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: 0.5, 0.5
+            padding: 5
+
+            Button:
+                text: "Live Kamera"
+                on_press: root.run()
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: 0.5, 0.5
+            padding: 5
+            Button:
+                text: 'Analiza'
+                on_release: root.manager.current =  "analytics"
+
+
+
+<Analytics>:
+    canvas.before:
+        Color:
+            rgba: 1, 1, 1, 1
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+    GridLayout:
+        cols: 1
+
+
+        BoxLayout:
+            orientation: 'vertical'
+            size_hint: 0.5, 0.5
+            padding: 5
+
+
+            Button:
+                text: "Ucitaj video za analizu"
+                on_release: root.manager.current = "browse_files"
+
+            Button:
+                text: "Statistika"
+                on_release: root.manager.current = "browse_files"
+
+            Button:
+                text: 'Back'
+                on_press: root.manager.current = 'main_screen'
+        
+
+<BrowseFiles>:
+
+    BoxLayout:
+        orientation:'vertical'
+        
+        BoxLayout:
+            size_hint_y: None
+            height: sp(52)
+
+            Button:
+                text: 'Nazad'
+                on_press: root.manager.current = 'analytics'
+                Image:
+                    source: '/assets/back.png'
+                    allow_stretch: True
+
+            Button:
+                text: 'Icon View'
+                on_press: fc.view_mode = 'icon'
+            Button:
+                text: 'List View'
+                on_press: fc.view_mode = 'list'
+
+        FileChooser:
+            id: filechooser
+            #color: 0,0,0,1
+            FileChooserIconLayout
+            FileChooserListLayout
+
+        BoxLayout:
+            orientation: 'horizontal'
+            size_hint: 1, 0.2
+            Button:
+                text: 'Pokreni video analizu'
+                on_release: root.load_video(filechooser.selection)
+
+<MsgPopup>:
+    size_hint: .75, .6
+    title: "Greska!"
+
+    BoxLayout:
+        orientation: 'vertical'
+        padding: 10
+        spacing: 20
+        Label:
+            id: message_label
+            size_hint_y: 0.4
+            text: "Label"
+        Button:
+            text: 'Ok'
+            size_hint_y: 0.4
+            on_press: root.dismiss_popup()
+
+
+<Manager>:
+    id: screen_manager
+
+    main_screen: main_screen
+    analytics: analytics
+
+    MainWindow:
+        id: main_screen
+        name: "main_screen"
+        manager: screen_manager
+
+    Analytics:
+        id: analytics
+        name: 'analytics'
+        manager: screen_manager
+    BrowseFiles:
+        id: browse_files
+        name: 'browse_files'
+        manager: screen_manager
+
+         
+    
+    
