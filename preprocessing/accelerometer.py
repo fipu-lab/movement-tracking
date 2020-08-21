@@ -4,7 +4,7 @@ import pandas as pd
 from geneactiv_reader import GENEActiv
 
 
-def process_bins(file_list, outfile):
+def process_bins(file_list, outfile, duration):
 
     agg = pd.DataFrame()
 
@@ -16,8 +16,7 @@ def process_bins(file_list, outfile):
 
         df = ga.aggregate("1s")
 
-        # Samo prvih 20 min
-        df = df[:20 * 60]
+        df = df[:duration]
 
         if agg.index.empty:
             agg["Time"] = df.index.values
@@ -36,6 +35,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("-d", "--dir", required=True, help="Directory of .bin files")
     ap.add_argument("-o", "--outfile", required=False, help=".csv output file", default=None)
+    ap.add_argument("-t", "--time-duration", required=False, help="Clip time duration in seconds", type=int, default=90 * 60) # Samo prvih 90 min
     args = ap.parse_args()
 
     args.dir = os.path.normpath(args.dir)
@@ -45,4 +45,4 @@ if __name__ == "__main__":
         assert args.outfile.endswith(".csv"), "output file must be .csv"
 
     file_list = [args.dir + os.path.sep + x for x in os.listdir(args.dir) if x.endswith(".bin")]
-    process_bins(file_list, args.outfile)
+    process_bins(file_list, args.outfile, args.time_duration)
