@@ -3,6 +3,7 @@ from __future__ import division
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torchvision import transforms
 from torch.autograd import Variable
 import numpy as np
 
@@ -11,6 +12,9 @@ from PIL import Image
 from utils.parse_config import *
 from utils.utils import build_targets
 from collections import defaultdict
+
+from utils import utils
+
 
 ##import matplotlib.pyplot as plt
 ##import matplotlib.patches as patches
@@ -348,3 +352,56 @@ class Darknet(nn.Module):
                 conv_layer.weight.data.cpu().numpy().tofile(fp)
 
         fp.close()
+
+
+# load weights and set defaults
+config_path='config/yolov3.cfg'
+weights_path='config/yolov3.weights'
+img_size = 416
+conf_thres = 0.8
+nms_thres = 0.4
+
+# load model and put into eval mode
+model = Darknet(config_path, img_size=img_size)
+model.load_weights(weights_path)
+model.cuda()
+model.eval()
+
+Tensor = torch.cuda.FloatTensor
+
+
+def detect(img):
+    # scale and pad image
+    ratio = min(img_size/img.size[0], img_size/img.size[1])
+    imw = round(img.size[0] * ratio)
+    imh = round(img.size[1] * ratio)
+    img_transforms = transforms.Compose([ transforms.Resize((imh, imw)),
+         transforms.Pad((max(int((imh-imw)/2),0), max(int((imw-imh)/2),0), max(int((imh-imw)/2),0), max(int((imw-imh)/2),0)),
+                        (128,128,128)),
+         transforms.ToTensor(),
+         ])
+    # convert image to Tensor
+    image_tensor = img_transforms(img).float()
+    image_tensor = image_tensor.unsqueeze_(0)
+    input_img = Variable(image_tensor.type(Tensor))
+    # run inference on the model and get detections
+    with torch.no_grad():
+        detections = model(input_img)
+        detections = utils.non_max_suppression(detections, 80, conf_thres, nms_thres)
+    return detections[0]
+
+
+def to_tlwh(img, x1, y1, x2, y2):
+
+    pad_x = max(img.shape[0] - img.shape[1], 0) * (img_size / max(img.shape))
+    pad_y = max(img.shape[1] - img.shape[0], 0) * (img_size / max(img.shape))
+
+    unpad_h = img_size - pad_y
+    unpad_w = img_size - pad_x
+
+    box_h = int(((y2 - y1) / unpad_h) * img.shape[0])
+    box_w = int(((x2 - x1) / unpad_w) * img.shape[1])
+    y1 = int(((y1 - pad_y // 2) / unpad_h) * img.shape[0])
+    x1 = int(((x1 - pad_x // 2) / unpad_w) * img.shape[1])
+
+    return x1, y1, box_w, box_h
