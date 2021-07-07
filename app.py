@@ -1,5 +1,5 @@
 import kivy
-kivy.require('1.10.1')
+kivy.require('2.0.0')
 from kivy.uix.screenmanager import ScreenManager, Screen, NoTransition
 from kivy.base import ExceptionHandler, ExceptionManager
 from kivy.app import App
@@ -9,11 +9,13 @@ from kivy.uix.popup import Popup
 from kivy.uix.image import Image
 from kivy.factory import Factory
 
-
 import os
 import cv2
 
 app = Builder.load_file("movement_tracking.kv")
+
+from pathlib import Path
+home_loc = os.path.join(str(Path.home()), "Desktop")
 
 
 class MainWindow(Screen):
@@ -22,8 +24,6 @@ class MainWindow(Screen):
 
     def run(self):
         os.system("python movement_tracking.py")
-
-
 
 class Analytics(Screen):
     pass
@@ -44,7 +44,9 @@ class BrowseFiles(Screen):
             if selected[0].lower().endswith('.mp4'):
                 self.file_path = str(selected[0]).replace('\\', '/')
                 self.load_video(self.file_path)
-                os.system("python movement_tracking.py --video " + '"' + self.file_path.replace('\\', '/') + '"')
+                filename = os.path.basename(self.file_path)
+                self.output_path = os.path.join(home_loc, os.path.splitext(filename)[0] + ".csv")
+                os.system(f"python movement_tracking.py --video {self.file_path} --output {self.output_path}")
             else:
                 popup = MsgPopup(e)
                 popup.open()
