@@ -23,6 +23,7 @@ import re
 parser = argparse.ArgumentParser()
 parser.add_argument("--video", help="Enter the name of your video file")
 parser.add_argument("--output", help= "Use if you want to keep csv file")
+parser.add_argument("--ids", help= "Add person ids")
 args = parser.parse_args()
 
 if args.output:
@@ -39,21 +40,22 @@ def start_visualization(file_name):
     if sys.platform == "win32":
         if re.search("\s", python): 
             python = "\""+python+"\""
-    print(python)
     os.system(str(python + " visualization.py "+ file_name))
 
 
 def write_to_csv(data, file_name):
+    fieldnames = ['timestamp', 'result']
+    if args.ids:
+        fieldnames.append("id")
     if os.path.exists(file_name):
         with open(file_name, "a", newline='') as file:
-            fieldnames = ['timestamp', "id",'result']
-            writer = csv.DictWriter(file, fieldnames = fieldnames)
+            writer = csv.DictWriter(file, fieldnames = fieldnames, dialect="excel", extrasaction='ignore')
             for key in data:
                 writer.writerow(key)
     else:
         with open(file_name, 'w', newline='') as file:
-            fieldnames = ['timestamp', "id",'result']
-            writer = csv.DictWriter(file, fieldnames = fieldnames)
+            fieldnames = ['timestamp', 'result']
+            writer = csv.DictWriter(file, fieldnames = fieldnames, dialect="excel", extrasaction='ignore')
             writer.writeheader()
             for key in data:
                 writer.writerow(key)
@@ -235,7 +237,8 @@ while(True):
                 data.append(temp)
 
                 if frames > 60:
-                    write_to_csv(calculate_movement(frames, data), file_name = csv_name)
+                    df = calculate_movement(frames, data)
+                    write_to_csv(df, file_name = csv_name)
                     if viz_flag:
                         t = threading.Thread(target=start_visualization, args=(csv_name, ))
                         t.daemon = True
@@ -251,6 +254,8 @@ while(True):
 
 totaltime = time.time()-starttime
 print(frames, "frames", totaltime/frames, "s/frame")
-cv2.destroyAllWindows()
-if not args.output:
-    os.remove(csv_name)
+try:
+    cv2.destroyAllWindows()
+finally:
+    if not args.output:
+        os.remove(csv_name)

@@ -40,6 +40,8 @@ class BrowseFiles(Screen):
     file_path = StringProperty("No file choosen")
 
     def load_video(self, selected):
+        print("Loading...")
+        
         try:
             if selected[0].lower().endswith('.mp4'):
                 self.file_path = str(selected[0]).replace('\\', '/')
@@ -47,10 +49,11 @@ class BrowseFiles(Screen):
                 filename = os.path.basename(self.file_path)
                 self.output_path = os.path.join(home_loc, os.path.splitext(filename)[0] + ".csv")
                 os.system(f"python movement_tracking.py --video {self.file_path} --output {self.output_path}")
-            else:
-                popup = MsgPopup(e)
+                print("Done")
+                popup = MsgPopup("Gotovo!")
                 popup.open()
         except Exception as e:
+            print(e)
             popup = MsgPopup(e)
             popup.open()
         
@@ -63,7 +66,7 @@ class BrowseFiles(Screen):
 class MsgPopup(Popup):
     def __init__(self, msg):
         super().__init__()
-        self.ids.message_label.text = "Niste odabrali ni jednu datoteku ili datoteka nije MP4 formata"
+        self.ids.message_label.text = msg or "Niste odabrali ni jednu datoteku ili datoteka nije MP4 formata"
 
     def dismiss_popup(self):
         self.dismiss()

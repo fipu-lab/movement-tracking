@@ -54,13 +54,8 @@
             size_hint: 0.5, 0.5
             padding: 5
 
-
             Button:
                 text: "Ucitaj video za analizu"
-                on_release: root.manager.current = "browse_files"
-
-            Button:
-                text: "Statistika"
                 on_release: root.manager.current = "browse_files"
 
             Button:
@@ -84,17 +79,13 @@
                     source: '/assets/back.png'
                     allow_stretch: True
 
-            Button:
-                text: 'Icon View'
-                on_press: fc.view_mode = 'icon'
-            Button:
-                text: 'List View'
-                on_press: fc.view_mode = 'list'
-
         FileChooser:
-            id: filechooser
+            id: fc
+            filters: ["*.mp4"]
+            path: "C:/Users/uniri/Desktop"
+
             #color: 0,0,0,1
-            FileChooserIconLayout
+            #FileChooserIconLayout
             FileChooserListLayout
 
         BoxLayout:
@@ -102,7 +93,7 @@
             size_hint: 1, 0.2
             Button:
                 text: 'Pokreni video analizu'
-                on_release: root.load_video(filechooser.selection)
+                on_release: root.load_video(fc.selection)
 
 <MsgPopup>:
     size_hint: .75, .6
