@@ -8,7 +8,7 @@ llvmlite==0.31.0
 matplotlib==3.2.1
 networkx==2.4
 pandas==1.0.3
-numpy==1.18.2
+numpy==1.22.0
 torch==1.4.0
 opencv_python==4.2.0.32
 Kivy==1.11.1
