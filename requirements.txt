@@ -2,7 +2,7 @@ cycler==0.10.0
 decorator==4.4.2
 filterpy==1.4.5
 imageio==2.8.0
-joblib==0.14.1
+joblib==1.2.0
 kiwisolver==1.1.0
 llvmlite==0.31.0
 matplotlib==3.2.1
